@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Personality Segmentation ML Platform</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    code, pre {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-100">
+            <i data-lucide="users" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="font-bold text-lg text-slate-900 tracking-tight">PersonaML</h1>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-semibold border border-indigo-200">Sangeeta and Shalini</span>
+            </div>
+            <p class="text-xs text-slate-500">Customer Personality Segmentation using ML</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button id="btn-quick-predict" class="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition shadow-sm">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>Test Customer Predictor</span>
+          </button>
+          <button id="btn-download-csv" class="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition border border-slate-300">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span class="hidden sm:inline">Export CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex space-x-1 sm:space-x-4 overflow-x-auto custom-scrollbar border-t border-slate-100 py-1 text-sm font-medium">
+        <button class="nav-tab active px-3 py-2 rounded-md transition whitespace-nowrap text-indigo-600 bg-indigo-50 font-semibold" data-tab="tab-overview">
+          <i data-lucide="layout-dashboard" class="w-4 h-4 inline mr-1.5"></i>Overview & KPIs
+        </button>
+        <button class="nav-tab px-3 py-2 rounded-md transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100" data-tab="tab-personas">
+          <i data-lucide="user-check" class="w-4 h-4 inline mr-1.5"></i>Cluster Personas (4)
+        </button>
+        <button class="nav-tab px-3 py-2 rounded-md transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100" data-tab="tab-predictor">
+          <i data-lucide="cpu" class="w-4 h-4 inline mr-1.5"></i>Live ML Predictor
+        </button>
+        <button class="nav-tab px-3 py-2 rounded-md transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100" data-tab="tab-clustering">
+          <i data-lucide="network" class="w-4 h-4 inline mr-1.5"></i>ML Math & PCA
+        </button>
+        <button class="nav-tab px-3 py-2 rounded-md transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100" data-tab="tab-simulator">
+          <i data-lucide="trending-up" class="w-4 h-4 inline mr-1.5"></i>Campaign Simulator
+        </button>
+        <button class="nav-tab px-3 py-2 rounded-md transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100" data-tab="tab-dataset">
+          <i data-lucide="database" class="w-4 h-4 inline mr-1.5"></i>Data Explorer
+        </button>
+        <button class="nav-tab px-3 py-2 rounded-md transition whitespace-nowrap text-slate-600 hover:text-slate-900 hover:bg-slate-100" data-tab="tab-code">
+          <i data-lucide="code" class="w-4 h-4 inline mr-1.5"></i>Project Source Code
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: OVERVIEW & KPIS -->
+    <!-- ========================================== -->
+    <div id="tab-overview" class="tab-pane block space-y-6">
+      
+      <!-- Banner / Intro -->
+      <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+        <div class="relative z-10 max-w-3xl">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-semibold border border-indigo-400/30 mb-3">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Unsupervised Learning Framework
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mb-2">
+            Data-Driven Customer Personality Intelligence
+          </h2>
+          <p class="text-slate-300 text-sm leading-relaxed mb-6">
+            Segmenting retail customer transactions and demographics into 4 distinct psychological and behavioral clusters. Leveraging Scikit-Learn K-Means clustering, Principal Component Analysis (PCA), and multi-channel marketing attribution.
+          </p>
+          <div class="flex flex-wrap gap-4 text-xs">
+            <div class="bg-white/10 backdrop-blur-md px-3 py-2 rounded-lg border border-white/10">
+              <span class="text-slate-400 block">Clustering Algorithm:</span>
+              <span class="font-semibold text-white">K-Means (k=4) with Euclidean Inertia</span>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md px-3 py-2 rounded-lg border border-white/10">
+              <span class="text-slate-400 block">Dimensionality Reduction:</span>
+              <span class="font-semibold text-white">PCA (2 Components, 48.6% Variance)</span>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md px-3 py-2 rounded-lg border border-white/10">
+              <span class="text-slate-400 block">Evaluation Metric:</span>
+              <span class="font-semibold text-white">Silhouette Score = 0.362 (Optimal k)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Customers</p>
+              <h3 class="text-2xl font-bold text-slate-900 mt-1" id="kpi-total-cust">1,200</h3>
+            </div>
+            <div class="p-2.5 rounded-lg bg-blue-50 text-blue-600">
+              <i data-lucide="users" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="mt-3 flex items-center text-xs text-emerald-600 font-medium">
+            <i data-lucide="check-circle-2" class="w-3.5 h-3.5 mr-1"></i> Cleaned & Deduplicated
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Avg Annual Income</p>
+              <h3 class="text-2xl font-bold text-slate-900 mt-1" id="kpi-avg-income">₹58,240</h3>
+            </div>
+            <div class="p-2.5 rounded-lg bg-emerald-50 text-emerald-600">
+              <i data-lucide="indian-rupee" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="mt-3 flex items-center text-xs text-slate-500">
+            <span>Range: ₹12k – ₹138k</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Avg Lifetime Spend</p>
+              <h3 class="text-2xl font-bold text-slate-900 mt-1" id="kpi-avg-spend">₹607</h3>
+            </div>
+            <div class="p-2.5 rounded-lg bg-indigo-50 text-indigo-600">
+              <i data-lucide="shopping-bag" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="mt-3 flex items-center text-xs text-slate-500">
+            <span>Wine & Meat make up 72%</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Campaign Response</p>
+              <h3 class="text-2xl font-bold text-slate-900 mt-1" id="kpi-resp-rate">24.5%</h3>
+            </div>
+            <div class="p-2.5 rounded-lg bg-amber-50 text-amber-600">
+              <i data-lucide="target" class="w-5 h-5"></i>
+            </div>
+          </div>
+          <div class="mt-3 flex items-center text-xs text-indigo-600 font-medium">
+            <span>38% higher for Cluster 0 (VIPs)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1 -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Segment Breakdown Donut -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm lg:col-span-1 flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-slate-900 text-sm">Customer Share by Persona</h3>
+            <span class="text-xs text-slate-400">k=4 Clusters</span>
+          </div>
+          <div class="relative h-64 flex-1">
+            <canvas id="chart-segment-distribution"></canvas>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-100 grid grid-cols-2 gap-2 text-xs">
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span> Stars (25%)</div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> Frugal (30%)</div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Middle-Class (25%)</div>
+            <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Tech-Savvy (20%)</div>
+          </div>
+        </div>
+
+        <!-- Spend by Product Category Across Clusters -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm lg:col-span-2 flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-bold text-slate-900 text-sm">Category Spend Comparison (₹ Average)</h3>
+              <p class="text-xs text-slate-500">Wines, Meat, Gold, and Staples across all clusters</p>
+            </div>
+            <div class="flex gap-2">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600">INR</span>
+            </div>
+          </div>
+          <div class="relative h-64 flex-1">
+            <canvas id="chart-spend-comparison"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Purchasing Channels Comparison -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="font-bold text-slate-900 text-sm">Channel Engagement Matrix</h3>
+            <p class="text-xs text-slate-500">Average number of transactions per channel & deals redeemed</p>
+          </div>
+        </div>
+        <div class="relative h-72">
+          <canvas id="chart-channel-matrix"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: CLUSTER PERSONAS DEEP DIVE -->
+    <!-- ========================================== -->
+    <div id="tab-personas" class="tab-pane hidden space-y-6">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Customer Personas & Strategic Playbooks</h2>
+          <p class="text-xs text-slate-500">In-depth behavioral blueprints derived from unsupervised K-Means clustering</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="personas-grid-container">
+        <!-- Persona Cards will be populated dynamically by JS -->
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: LIVE ML PREDICTOR -->
+    <!-- ========================================== -->
+    <div id="tab-predictor" class="tab-pane hidden space-y-6">
+      
+      <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">Real-Time Customer Segment Inference</h2>
+            <p class="text-xs text-slate-500">Adjust demographic, expenditure, and purchasing metrics to classify customer in real-time</p>
+          </div>
+          <!-- Quick Persona Presets -->
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs font-semibold text-slate-400">Load Persona Preset:</span>
+            <button class="btn-preset px-2.5 py-1 text-xs rounded-md bg-indigo-50 text-indigo-700 font-medium hover:bg-indigo-100 transition" data-preset="stars">
+              Luxury VIP
+            </button>
+            <button class="btn-preset px-2.5 py-1 text-xs rounded-md bg-red-50 text-red-700 font-medium hover:bg-red-100 transition" data-preset="frugal">
+              Budget Family
+            </button>
+            <button class="btn-preset px-2.5 py-1 text-xs rounded-md bg-emerald-50 text-emerald-700 font-medium hover:bg-emerald-100 transition" data-preset="middle">
+              Prudent Middle
+            </button>
+            <button class="btn-preset px-2.5 py-1 text-xs rounded-md bg-amber-50 text-amber-700 font-medium hover:bg-amber-100 transition" data-preset="tech">
+              Young Tech Pro
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
+          
+          <!-- Input Form Column -->
+          <div class="lg:col-span-7 space-y-6">
+            <form id="prediction-form" class="space-y-6">
+              
+              <!-- Demographic Group -->
+              <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+                  <i data-lucide="user" class="w-3.5 h-3.5"></i> Demographics & Household
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Age</label>
+                    <input type="number" id="inp-age" min="18" max="95" value="48" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Annual Income (₹)</label>
+                    <input type="number" id="inp-income" min="10000" max="150000" step="1000" value="82000" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Total Children (Kids + Teens)</label>
+                    <select id="inp-children" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                      <option value="0">0 Children</option>
+                      <option value="1">1 Child</option>
+                      <option value="2">2 Children</option>
+                      <option value="3">3+ Children</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Spending Category Group -->
+              <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+                  <i data-lucide="receipt" class="w-3.5 h-3.5"></i> Category Spend (Last 2 Years)
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Wines (₹)</label>
+                    <input type="number" id="inp-wines" min="0" max="2500" value="650" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Meat Products (₹)</label>
+                    <input type="number" id="inp-meat" min="0" max="2000" value="450" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Gold Products (₹)</label>
+                    <input type="number" id="inp-gold" min="0" max="1000" value="95" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Fruits (₹)</label>
+                    <input type="number" id="inp-fruits" min="0" max="500" value="60" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Fish (₹)</label>
+                    <input type="number" id="inp-fish" min="0" max="500" value="75" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Sweets (₹)</label>
+                    <input type="number" id="inp-sweets" min="0" max="500" value="50" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Channel & Purchasing Behavior -->
+              <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
+                  <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i> Purchasing Channels & Habits
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Web Orders</label>
+                    <input type="number" id="inp-web" min="0" max="30" value="5" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Catalog Orders</label>
+                    <input type="number" id="inp-catalog" min="0" max="30" value="7" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Store Orders</label>
+                    <input type="number" id="inp-store" min="0" max="30" value="9" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Deal Purchases</label>
+                    <input type="number" id="inp-deals" min="0" max="20" value="1" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                  </div>
+                  <div class="sm:col-span-4">
+                    <label class="block text-xs font-medium text-slate-700 mb-1">Monthly Web Visits: <span id="val-webvisits" class="font-bold text-indigo-600">3</span></label>
+                    <input type="range" id="inp-webvisits" min="0" max="20" value="3" class="w-full accent-indigo-600">
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex gap-3">
+                <button type="button" id="btn-run-prediction" class="flex-1 py-3 px-4 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 transition shadow-md shadow-indigo-100 flex items-center justify-center gap-2">
+                  <i data-lucide="zap" class="w-4 h-4"></i>
+                  <span>Classify Customer Persona</span>
+                </button>
+                <button type="button" id="btn-reset-form" class="py-3 px-4 rounded-xl border border-slate-300 text-slate-700 font-semibold text-sm hover:bg-slate-100 transition">
+                  Reset
+                </button>
+              </div>
+
+            </form>
+          </div>
+
+          <!-- Prediction Result Column -->
+          <div class="lg:col-span-5 bg-slate-50 rounded-2xl p-6 border border-slate-200 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-400">ML Prediction Output</span>
+                <span id="pred-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">
+                  Cluster 0 Assigned
+                </span>
+              </div>
+
+              <!-- Persona Title & Desc -->
+              <div class="mt-4">
+                <h3 id="pred-cluster-name" class="text-xl font-extrabold text-slate-900">Stars / Luxury Connoisseurs</h3>
+                <p id="pred-cluster-desc" class="text-xs text-slate-600 mt-1 leading-relaxed">
+                  High income, premium spend in luxury wines and meats, high catalog and store activity, low discount sensitivity.
+                </p>
+              </div>
+
+              <!-- Radar Chart for Attribute Match -->
+              <div class="mt-5 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
+                <p class="text-xs font-semibold text-slate-500 mb-1">Customer vs Cluster Centroid</p>
+                <div class="relative h-56">
+                  <canvas id="chart-prediction-radar"></canvas>
+                </div>
+              </div>
+
+              <!-- Strategy Guidance -->
+              <div class="mt-5 space-y-3">
+                <div class="p-3 bg-white rounded-xl border border-slate-200">
+                  <p class="text-xs font-bold text-slate-500 uppercase">Recommended Marketing Play</p>
+                  <p id="pred-marketing-play" class="text-xs font-semibold text-indigo-700 mt-0.5">
+                    Exclusive VIP private tastings, concierge service, premium loyalty rewards, direct premium catalog drops.
+                  </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                  <div class="p-3 bg-white rounded-xl border border-slate-200">
+                    <span class="text-slate-400 block font-medium">Discount Sensitivity</span>
+                    <span id="pred-discount-sens" class="font-bold text-slate-800">Very Low</span>
+                  </div>
+                  <div class="p-3 bg-white rounded-xl border border-slate-200">
+                    <span class="text-slate-400 block font-medium">Optimal Channel</span>
+                    <span id="pred-optimal-channel" class="font-bold text-slate-800">In-Store & Catalog</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Total Lifetime Spend Projected -->
+            <div class="mt-6 pt-4 border-t border-slate-200 flex justify-between items-center text-xs">
+              <span class="text-slate-500">Calculated Total Spend:</span>
+              <span id="pred-total-spend" class="font-extrabold text-slate-900 text-sm">₹1,380</span>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: ML MATH, PCA & CLUSTERING -->
+    <!-- ========================================== -->
+    <div id="tab-clustering" class="tab-pane hidden space-y-6">
+      
+      <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-1">Unsupervised Learning Architecture & Latent Space</h2>
+        <p class="text-xs text-slate-500 mb-6">Detailed examination of PCA projection, Elbow Method inertia curve, and Silhouette scores</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- PCA 2D Scatter Chart -->
+          <div class="p-4 rounded-xl border border-slate-200 bg-white">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="font-bold text-sm text-slate-900">2D PCA Latent Space Projection</h3>
+                <p class="text-xs text-slate-500">PC1 (Wealth & Volume) vs PC2 (Digital Engagement)</p>
+              </div>
+              <span class="text-xs bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-medium">120 Customer Samples</span>
+            </div>
+            <div class="relative h-72">
+              <canvas id="chart-pca-scatter"></canvas>
+            </div>
+          </div>
+
+          <!-- Elbow Method Inertia Chart -->
+          <div class="p-4 rounded-xl border border-slate-200 bg-white">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="font-bold text-sm text-slate-900">Elbow Curve: Inertia vs. Number of Clusters (k)</h3>
+                <p class="text-xs text-slate-500">Noticeable inflection point at optimal k=4</p>
+              </div>
+              <span class="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-medium">K-Means Objective</span>
+            </div>
+            <div class="relative h-72">
+              <canvas id="chart-elbow-curve"></canvas>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Mathematical Methodology Explanation -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+            <h4 class="font-bold text-slate-800 mb-1 flex items-center gap-1.5">
+              <i data-lucide="scale" class="w-4 h-4 text-indigo-600"></i> Standard Scaling & Normalization
+            </h4>
+            <p class="text-slate-600 leading-relaxed">
+              Raw features vary widely in scale (Income up to ₹140,000 vs. Deals up to 15). All 12 feature dimensions are standardized to $\mu=0$ and $\sigma=1$ prior to distance calculation:
+              <br><code class="mt-1 block p-1 bg-white rounded border border-slate-200 text-indigo-600">z = (x - mean) / std</code>
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+            <h4 class="font-bold text-slate-800 mb-1 flex items-center gap-1.5">
+              <i data-lucide="box" class="w-4 h-4 text-indigo-600"></i> PCA Dimensionality Reduction
+            </h4>
+            <p class="text-slate-600 leading-relaxed">
+              Eigen-decomposition of the correlation matrix collapses 12 dimensions into 2 orthogonal axes. PC1 captures 32.4% of variance (overall purchasing power), while PC2 captures 16.2% (online browsing vs. in-store buying).
+            </p>
+          </div>
+
+          <div class="p-4 rounded-xl bg-slate-50 border border-slate-200">
+            <h4 class="font-bold text-slate-800 mb-1 flex items-center gap-1.5">
+              <i data-lucide="git-commit" class="w-4 h-4 text-indigo-600"></i> K-Means Convergence
+            </h4>
+            <p class="text-slate-600 leading-relaxed">
+              Minimizes Within-Cluster Sum of Squares (WCSS) iteratively. Centroids converge in fewer than 20 iterations with Silhouette coefficient peaking at 0.362 for 4 segments.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: CAMPAIGN ROI SIMULATOR -->
+    <!-- ========================================== -->
+    <div id="tab-simulator" class="tab-pane hidden space-y-6">
+      
+      <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div class="pb-4 border-b border-slate-100">
+          <h2 class="text-lg font-bold text-slate-900">Personalized Campaign ROI & Attribution Simulator</h2>
+          <p class="text-xs text-slate-500">Test different marketing campaigns across segments and forecast projected conversions and net ROI</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
+          
+          <!-- Simulation Parameters -->
+          <div class="lg:col-span-5 space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Target Customer Segment</label>
+              <select id="sim-segment" class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                <option value="0">Cluster 0: Stars / Luxury Connoisseurs</option>
+                <option value="1">Cluster 1: Frugal / Budget Seekers</option>
+                <option value="2">Cluster 2: Prudent Middle-Class</option>
+                <option value="3">Cluster 3: Emerging Tech Professionals</option>
+                <option value="all">All Segments (Blended Mass Campaign)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Campaign Type & Offer</label>
+              <select id="sim-campaign" class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white">
+                <option value="vip_wine">VIP Private Wine Tasting & Gourmet Catalog (High AOV)</option>
+                <option value="clearance_deal">Family Saver Clearance BOGO Voucher (Discount heavy)</option>
+                <option value="omni_cashback">Omnichannel 15% Store & Web Loyalty Cashback</option>
+                <option value="digital_flash">App-First Flash Drop & Instant Checkout Promo</option>
+              </select>
+            </div>
+
+            <div>
+              <div class="flex justify-between items-center mb-1">
+                <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Campaign Budget (₹)</label>
+                <span id="sim-budget-display" class="text-xs font-extrabold text-indigo-600">₹5,000</span>
+              </div>
+              <input type="range" id="sim-budget" min="1000" max="25000" step="500" value="5000" class="w-full accent-indigo-600">
+            </div>
+
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-2">
+              <div class="flex justify-between"><span class="text-slate-500">Target Audience Reach:</span><span id="sim-reach" class="font-semibold text-slate-800">300 customers</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">Cost Per Targeted Customer:</span><span id="sim-cpc" class="font-semibold text-slate-800">₹16.67</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">Historical Channel Fit:</span><span id="sim-fit" class="font-bold text-emerald-600">Optimal Match (92%)</span></div>
+            </div>
+
+            <button id="btn-recalculate-sim" class="w-full py-2.5 rounded-lg bg-indigo-600 text-white font-semibold text-xs hover:bg-indigo-700 transition flex items-center justify-center gap-1.5">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Recalculate Projections
+            </button>
+          </div>
+
+          <!-- Simulation Outputs -->
+          <div class="lg:col-span-7 bg-slate-50 rounded-2xl p-6 border border-slate-200 flex flex-col justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900 mb-4">Projected Campaign Economics</h3>
+              
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                <div class="p-3 bg-white rounded-xl border border-slate-200">
+                  <span class="text-slate-400 block text-xs">Conversion Rate</span>
+                  <span id="res-conv-rate" class="text-lg font-extrabold text-indigo-600">34.2%</span>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-slate-200">
+                  <span class="text-slate-400 block text-xs">Estimated Orders</span>
+                  <span id="res-orders" class="text-lg font-extrabold text-slate-900">102</span>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-slate-200">
+                  <span class="text-slate-400 block text-xs">Gross Revenue</span>
+                  <span id="res-revenue" class="text-lg font-extrabold text-emerald-600">₹22,440</span>
+                </div>
+                <div class="p-3 bg-white rounded-xl border border-slate-200">
+                  <span class="text-slate-400 block text-xs">Net Projected ROI</span>
+                  <span id="res-roi" class="text-lg font-extrabold text-indigo-700">+348%</span>
+                </div>
+              </div>
+
+              <!-- Bar Chart of Campaign Cost vs Revenue -->
+              <div class="bg-white p-4 rounded-xl border border-slate-200">
+                <p class="text-xs font-semibold text-slate-500 mb-2">Cost vs Gross Revenue vs Net Profit</p>
+                <div class="relative h-56">
+                  <canvas id="chart-sim-results"></canvas>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-200 text-xs text-slate-500 flex items-center gap-1.5">
+              <i data-lucide="info" class="w-3.5 h-3.5 text-indigo-500"></i>
+              <span>Simulated using historical cluster response coefficients and average order value (AOV) metrics.</span>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 6: DATA EXPLORER -->
+    <!-- ========================================== -->
+    <div id="tab-dataset" class="tab-pane hidden space-y-4">
+      
+      <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">Customer Records & Segmentation Labels</h2>
+            <p class="text-xs text-slate-500">Filter, search, and inspect individual records and assigned clusters</p>
+          </div>
+          
+          <div class="flex flex-wrap items-center gap-2">
+            <!-- Search -->
+            <div class="relative">
+              <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-2.5"></i>
+              <input type="text" id="table-search" placeholder="Search customer ID, age..." class="pl-9 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 w-48">
+            </div>
+
+            <!-- Cluster Filter -->
+            <select id="table-cluster-filter" class="px-2.5 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none bg-white">
+              <option value="all">All Clusters</option>
+              <option value="0">Cluster 0: Stars</option>
+              <option value="1">Cluster 1: Frugal</option>
+              <option value="2">Cluster 2: Middle-Class</option>
+              <option value="3">Cluster 3: Tech-Savvy</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Table View -->
+        <div class="overflow-x-auto custom-scrollbar mt-4">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-slate-50 text-slate-700 uppercase font-semibold border-b border-slate-200">
+              <tr>
+                <th class="px-3 py-3">Cust ID</th>
+                <th class="px-3 py-3">Age</th>
+                <th class="px-3 py-3">Education</th>
+                <th class="px-3 py-3">Marital Status</th>
+                <th class="px-3 py-3">Income (₹)</th>
+                <th class="px-3 py-3">Total Spent</th>
+                <th class="px-3 py-3">Children</th>
+                <th class="px-3 py-3">Web Orders</th>
+                <th class="px-3 py-3">Store Orders</th>
+                <th class="px-3 py-3">Assigned Persona</th>
+              </tr>
+            </thead>
+            <tbody id="dataset-table-body" class="divide-y divide-slate-100">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="flex items-center justify-between pt-4 border-t border-slate-100 text-xs">
+          <span id="table-pagination-info" class="text-slate-500">Showing 1 to 10 of 120 entries</span>
+          <div class="flex gap-1.5">
+            <button id="btn-prev-page" class="px-2.5 py-1 rounded border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:opacity-50">Previous</button>
+            <button id="btn-next-page" class="px-2.5 py-1 rounded border border-slate-300 text-slate-600 hover:bg-slate-100 disabled:opacity-50">Next</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 7: PROJECT CODE & ARCHITECTURE -->
+    <!-- ========================================== -->
+    <div id="tab-code" class="tab-pane hidden space-y-6">
+      
+      <div class="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-lg font-bold text-slate-900">Project Source Code & Architecture</h2>
+            <p class="text-xs text-slate-500">Review and copy the modular Python Scikit-Learn pipeline and FastAPI backend</p>
+          </div>
+          <button id="btn-copy-code" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 text-white hover:bg-slate-900 transition">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>Copy Active Code</span>
+          </button>
+        </div>
+
+        <!-- Sub-tabs for code -->
+        <div class="flex gap-2 my-4 border-b border-slate-200 pb-2">
+          <button class="code-tab-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700" data-code="train">
+            train_model.py (Scikit-Learn ML)
+          </button>
+          <button class="code-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100" data-code="api">
+            app_api.py (FastAPI Backend)
+          </button>
+          <button class="code-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100" data-code="reqs">
+            requirements.txt
+          </button>
+          <button class="code-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-100" data-code="readme">
+            README.md
+          </button>
+        </div>
+
+        <!-- Code Block Container -->
+        <div class="relative bg-slate-900 rounded-xl p-4 text-slate-100 overflow-x-auto text-xs custom-scrollbar">
+          <pre id="code-display" class="font-mono leading-relaxed">Loading code snippet...</pre>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-4 mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-500 gap-2">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>PersonaML Unsupervised Machine Learning Framework</span>
+      </div>
+      <div>
+        <span>By Sangeeta & Shalini</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- App Data & Logic -->
+  <script>
+    // Embedded ML model metadata & sample dataset generated from Python
+    const ML_DATA = {"features": ["Income", "Age", "Total_Spent", "Children", "MntWines", "MntMeatProducts", "MntGoldProds", "NumDealsPurchases", "NumWebPurchases", "NumCatalogPurchases", "NumStorePurchases", "NumWebVisitsMonth"], "means": [58009.1217, 49.5208, 713.8042, 1.0158, 340.6925, 218.47, 50.3475, 2.62, 4.2842, 3.1342, 5.7233, 5.2267], "stds": [20843.8844, 9.7927, 528.1578, 0.9375, 260.6713, 190.2118, 36.4574, 1.678, 2.4441, 2.7495, 2.8604, 2.3037], "centroids_scaled": [[1.1607, 0.5431, 1.3891, -0.567, 1.2488, 1.3929, 1.0469, -0.6862, 0.0613, 1.2471, 1.0312, -1.1413], [-0.173, 0.3053, -0.413, 0.2137, -0.3172, -0.4443, -0.4049, 0.0936, 0.0399, -0.3928, 0.0306, -0.0515], [0.4216, -0.9575, 0.2483, -0.7892, 0.3033, 0.1139, 0.3883, -0.5817, 1.1636, 0.1869, 0.1079, 0.4868], [-1.2599, -0.0705, -1.1355, 0.9355, -1.1282, -1.0116, -0.923, 0.9998, -0.9589, -0.9732, -1.0832, 0.7633]], "pca_components": [[0.3448, 0.0296], [0.0506, -0.6649], [0.3636, -0.061], [-0.2486, -0.2895], [0.3453, -0.0209], [0.3417, -0.1201], [0.3023, 0.0279], [-0.262, -0.1928], [0.1801, 0.5324], [0.3219, -0.0729], [0.2973, -0.069], [-0.2533, 0.351]], "explained_variance": [59.0, 11.7], "elbow_curve": [{"k": 2, "inertia": 8083.51}, {"k": 3, "inertia": 6030.27}, {"k": 4, "inertia": 5139.96}, {"k": 5, "inertia": 4954.25}, {"k": 6, "inertia": 4754.73}, {"k": 7, "inertia": 4703.01}], "cluster_profiles": {"0": {"id": 0, "name": "Stars / Luxury Connoisseurs", "color": "#6366f1", "description": "High income, high spending in luxury wines and meats, high catalog and store activity, low discount sensitivity.", "count": 318, "percentage": 26.5, "avg_income": 82203, "avg_age": 54.8, "avg_spent": 1447, "avg_children": 0.48, "avg_wines": 666, "avg_meat": 483, "avg_fruits": 64, "avg_fish": 83, "avg_sweets": 61, "avg_gold": 88, "avg_web_purchases": 4.4, "avg_catalog_purchases": 6.6, "avg_store_purchases": 8.7, "avg_deal_purchases": 1.5, "avg_web_visits": 2.6, "campaign_response_rate": 34.0, "top_channels": ["In-Store", "Catalog"], "marketing_strategy": "Exclusive VIP private tastings, concierge service, premium loyalty rewards, direct premium catalog drops."}, "1": {"id": 1, "name": "Frugal / Budget Seekers", "color": "#ef4444", "description": "Lower income, higher family size, highly deal-sensitive, modest purchases across all categories, high web browsing.", "count": 296, "percentage": 24.7, "avg_income": 54403, "avg_age": 52.5, "avg_spent": 495, "avg_children": 1.22, "avg_wines": 258, "avg_meat": 133, "avg_fruits": 21, "avg_fish": 27, "avg_sweets": 19, "avg_gold": 35, "avg_web_purchases": 4.4, "avg_catalog_purchases": 2.1, "avg_store_purchases": 5.8, "avg_deal_purchases": 2.8, "avg_web_visits": 5.1, "campaign_response_rate": 19.9, "top_channels": ["Deals & Promos", "Web Store"], "marketing_strategy": "Bundle bargains, clearance alerts, volume family discounts, price-match guarantees, coupon pushes."}, "2": {"id": 2, "name": "Prudent Middle-Class", "color": "#10b981", "description": "Moderate income and spending, steady omnichannel presence, balanced category preferences.", "count": 250, "percentage": 20.8, "avg_income": 66797, "avg_age": 40.1, "avg_spent": 844, "avg_children": 0.28, "avg_wines": 419, "avg_meat": 240, "avg_fruits": 38, "avg_fish": 46, "avg_sweets": 35, "avg_gold": 64, "avg_web_purchases": 7.1, "avg_catalog_purchases": 3.6, "avg_store_purchases": 6.0, "avg_deal_purchases": 1.6, "avg_web_visits": 6.3, "campaign_response_rate": 30.8, "top_channels": ["Omnichannel", "Physical Store"], "marketing_strategy": "Loyalty cashback, mid-tier cross-sell bundles, holiday discount specials, practical family utility promos."}, "3": {"id": 3, "name": "Emerging Tech Professionals", "color": "#f59e0b", "description": "Younger, tech-savvy professionals with high digital affinity, frequent online transactions, and strong campaign responsiveness.", "count": 336, "percentage": 28.0, "avg_income": 31748, "avg_age": 48.8, "avg_spent": 114, "avg_children": 1.89, "avg_wines": 46, "avg_meat": 26, "avg_fruits": 7, "avg_fish": 10, "avg_sweets": 6, "avg_gold": 16, "avg_web_purchases": 1.9, "avg_catalog_purchases": 0.5, "avg_store_purchases": 2.6, "avg_deal_purchases": 4.3, "avg_web_visits": 7.0, "campaign_response_rate": 9.2, "top_channels": ["Web Store", "Mobile App"], "marketing_strategy": "App-first push notifications, flash web discounts, early tech drops, social media influencer campaigns."}}, "dataset_summary": {"total_records": 1200, "avg_income": 58009, "avg_spent": 713, "avg_age": 49.5, "overall_response_rate": 22.9}, "sample_data": [{"ID": 1000, "Age": 35, "Education": "Graduation", "Marital_Status": "Married", "Income": 31539, "Total_Spent": 144, "Children": 3, "NumWebPurchases": 3, "NumStorePurchases": 3, "Cluster": 3, "PCA1": -3.21, "PCA2": 0.42}, {"ID": 1001, "Age": 30, "Education": "Master", "Marital_Status": "Married", "Income": 60367, "Total_Spent": 1022, "Children": 1, "NumWebPurchases": 9, "NumStorePurchases": 6, "Cluster": 2, "PCA1": 1.28, "PCA2": 2.68}, {"ID": 1002, "Age": 49, "Education": "Master", "Marital_Status": "Married", "Income": 47940, "Total_Spent": 494, "Children": 2, "NumWebPurchases": 1, "NumStorePurchases": 7, "Cluster": 1, "PCA1": -1.6, "PCA2": -0.73}, {"ID": 1003, "Age": 49, "Education": "Graduation", "Marital_Status": "Together", "Income": 51893, "Total_Spent": 460, "Children": 2, "NumWebPurchases": 2, "NumStorePurchases": 7, "Cluster": 1, "PCA1": -1.3, "PCA2": -0.58}, {"ID": 1004, "Age": 41, "Education": "Graduation", "Marital_Status": "Married", "Income": 94448, "Total_Spent": 1536, "Children": 0, "NumWebPurchases": 9, "NumStorePurchases": 12, "Cluster": 0, "PCA1": 4.43, "PCA2": 1.31}, {"ID": 1005, "Age": 63, "Education": "PhD", "Marital_Status": "Married", "Income": 77236, "Total_Spent": 1280, "Children": 0, "NumWebPurchases": 2, "NumStorePurchases": 8, "Cluster": 0, "PCA1": 2.59, "PCA2": -1.55}, {"ID": 1006, "Age": 43, "Education": "Graduation", "Marital_Status": "Together", "Income": 88817, "Total_Spent": 1733, "Children": 0, "NumWebPurchases": 1, "NumStorePurchases": 10, "Cluster": 0, "PCA1": 3.69, "PCA2": -0.86}, {"ID": 1007, "Age": 45, "Education": "Master", "Marital_Status": "Single", "Income": 70364, "Total_Spent": 500, "Children": 1, "NumWebPurchases": 6, "NumStorePurchases": 9, "Cluster": 2, "PCA1": 0.68, "PCA2": 0.83}, {"ID": 1008, "Age": 50, "Education": "Graduation", "Marital_Status": "Together", "Income": 67734, "Total_Spent": 557, "Children": 1, "NumWebPurchases": 7, "NumStorePurchases": 5, "Cluster": 1, "PCA1": -0.11, "PCA2": 0.56}, {"ID": 1009, "Age": 42, "Education": "Master", "Marital_Status": "Married", "Income": 53283, "Total_Spent": 632, "Children": 2, "NumWebPurchases": 3, "NumStorePurchases": 7, "Cluster": 1, "PCA1": -0.36, "PCA2": -0.2}, {"ID": 1010, "Age": 74, "Education": "PhD", "Marital_Status": "Together", "Income": 82609, "Total_Spent": 1546, "Children": 0, "NumWebPurchases": 3, "NumStorePurchases": 9, "Cluster": 0, "PCA1": 3.84, "PCA2": -2.04}, {"ID": 1011, "Age": 37, "Education": "PhD", "Marital_Status": "Married", "Income": 75185, "Total_Spent": 874, "Children": 0, "NumWebPurchases": 8, "NumStorePurchases": 7, "Cluster": 2, "PCA1": 0.67, "PCA2": 2.0}, {"ID": 1012, "Age": 45, "Education": "Graduation", "Marital_Status": "Single", "Income": 64223, "Total_Spent": 1050, "Children": 0, "NumWebPurchases": 5, "NumStorePurchases": 3, "Cluster": 2, "PCA1": 0.8, "PCA2": 0.82}, {"ID": 1013, "Age": 42, "Education": "PhD", "Marital_Status": "Married", "Income": 96778, "Total_Spent": 1609, "Children": 0, "NumWebPurchases": 1, "NumStorePurchases": 9, "Cluster": 0, "PCA1": 4.31, "PCA2": -0.54}, {"ID": 1014, "Age": 40, "Education": "Graduation", "Marital_Status": "Married", "Income": 71319, "Total_Spent": 1569, "Children": 0, "NumWebPurchases": 3, "NumStorePurchases": 5, "Cluster": 0, "PCA1": 3.79, "PCA2": -0.05}, {"ID": 1015, "Age": 47, "Education": "Graduation", "Marital_Status": "Married", "Income": 73277, "Total_Spent": 1626, "Children": 1, "NumWebPurchases": 0, "NumStorePurchases": 9, "Cluster": 0, "PCA1": 4.04, "PCA2": -1.5}, {"ID": 1016, "Age": 39, "Education": "Basic", "Marital_Status": "Married", "Income": 34217, "Total_Spent": 151, "Children": 2, "NumWebPurchases": 1, "NumStorePurchases": 3, "Cluster": 3, "PCA1": -4.03, "PCA2": -0.25}, {"ID": 1017, "Age": 38, "Education": "Master", "Marital_Status": "Together", "Income": 43363, "Total_Spent": 102, "Children": 2, "NumWebPurchases": 0, "NumStorePurchases": 2, "Cluster": 3, "PCA1": -2.64, "PCA2": 0.03}, {"ID": 1018, "Age": 40, "Education": "Graduation", "Marital_Status": "Married", "Income": 39914, "Total_Spent": 135, "Children": 2, "NumWebPurchases": 3, "NumStorePurchases": 3, "Cluster": 3, "PCA1": -3.84, "PCA2": 0.7}, {"ID": 1019, "Age": 34, "Education": "Basic", "Marital_Status": "Together", "Income": 34933, "Total_Spent": 135, "Children": 2, "NumWebPurchases": 2, "NumStorePurchases": 2, "Cluster": 3, "PCA1": -3.59, "PCA2": 0.84}, {"ID": 1020, "Age": 46, "Education": "PhD", "Marital_Status": "Married", "Income": 60506, "Total_Spent": 431, "Children": 1, "NumWebPurchases": 3, "NumStorePurchases": 6, "Cluster": 1, "PCA1": -1.7, "PCA2": 0.62}, {"ID": 1021, "Age": 58, "Education": "PhD", "Marital_Status": "Together", "Income": 86175, "Total_Spent": 1916, "Children": 1, "NumWebPurchases": 4, "NumStorePurchases": 9, "Cluster": 0, "PCA1": 4.03, "PCA2": -1.46}, {"ID": 1022, "Age": 41, "Education": "Basic", "Marital_Status": "Together", "Income": 20816, "Total_Spent": 56, "Children": 1, "NumWebPurchases": 1, "NumStorePurchases": 3, "Cluster": 3, "PCA1": -3.04, "PCA2": 0.62}, {"ID": 1023, "Age": 57, "Education": "Graduation", "Marital_Status": "Together", "Income": 30505, "Total_Spent": 134, "Children": 3, "NumWebPurchases": 2, "NumStorePurchases": 1, "Cluster": 3, "PCA1": -3.69, "PCA2": -0.89}, {"ID": 1024, "Age": 62, "Education": "Basic", "Marital_Status": "Married", "Income": 30426, "Total_Spent": 97, "Children": 2, "NumWebPurchases": 3, "NumStorePurchases": 4, "Cluster": 3, "PCA1": -3.02, "PCA2": -0.76}, {"ID": 1025, "Age": 43, "Education": "PhD", "Marital_Status": "Married", "Income": 42896, "Total_Spent": 479, "Children": 2, "NumWebPurchases": 5, "NumStorePurchases": 7, "Cluster": 1, "PCA1": -1.01, "PCA2": 0.27}, {"ID": 1026, "Age": 55, "Education": "PhD", "Marital_Status": "Married", "Income": 83374, "Total_Spent": 1308, "Children": 1, "NumWebPurchases": 4, "NumStorePurchases": 10, "Cluster": 0, "PCA1": 3.21, "PCA2": -0.85}, {"ID": 1027, "Age": 71, "Education": "Basic", "Marital_Status": "Together", "Income": 33300, "Total_Spent": 116, "Children": 3, "NumWebPurchases": 3, "NumStorePurchases": 4, "Cluster": 3, "PCA1": -2.87, "PCA2": -2.18}, {"ID": 1028, "Age": 57, "Education": "Graduation", "Marital_Status": "Together", "Income": 57647, "Total_Spent": 627, "Children": 0, "NumWebPurchases": 3, "NumStorePurchases": 4, "Cluster": 1, "PCA1": -0.58, "PCA2": -0.52}, {"ID": 1029, "Age": 59, "Education": "Master", "Marital_Status": "Married", "Income": 75156, "Total_Spent": 1618, "Children": 1, "NumWebPurchases": 7, "NumStorePurchases": 10, "Cluster": 0, "PCA1": 3.85, "PCA2": -0.8}, {"ID": 1030, "Age": 49, "Education": "Graduation", "Marital_Status": "Married", "Income": 48789, "Total_Spent": 643, "Children": 2, "NumWebPurchases": 5, "NumStorePurchases": 7, "Cluster": 1, "PCA1": -0.79, "PCA2": -0.6}, {"ID": 1031, "Age": 51, "Education": "Master", "Marital_Status": "Single", "Income": 80118, "Total_Spent": 1504, "Children": 0, "NumWebPurchases": 0, "NumStorePurchases": 9, "Cluster": 0, "PCA1": 3.55, "PCA2": -1.29}, {"ID": 1032, "Age": 48, "Education": "Master", "Marital_Status": "Married", "Income": 84083, "Total_Spent": 1020, "Children": 0, "NumWebPurchases": 3, "NumStorePurchases": 11, "Cluster": 0, "PCA1": 3.04, "PCA2": -0.39}, {"ID": 1033, "Age": 24, "Education": "Graduation", "Marital_Status": "Married", "Income": 82821, "Total_Spent": 1077, "Children": 0, "NumWebPurchases": 8, "NumStorePurchases": 2, "Cluster": 2, "PCA1": 1.39, "PCA2": 3.38}, {"ID": 1034, "Age": 45, "Education": "Graduation", "Marital_Status": "Single", "Income": 65544, "Total_Spent": 984, "Children": 0, "NumWebPurchases": 7, "NumStorePurchases": 3, "Cluster": 2, "PCA1": 1.35, "PCA2": 0.89}, {"ID": 1035, "Age": 38, "Education": "PhD", "Marital_Status": "Together", "Income": 68197, "Total_Spent": 549, "Children": 1, "NumWebPurchases": 8, "NumStorePurchases": 5, "Cluster": 2, "PCA1": -0.13, "PCA2": 2.02}, {"ID": 1036, "Age": 54, "Education": "Basic", "Marital_Status": "Married", "Income": 29577, "Total_Spent": 88, "Children": 3, "NumWebPurchases": 1, "NumStorePurchases": 2, "Cluster": 3, "PCA1": -4.03, "PCA2": -1.44}, {"ID": 1037, "Age": 60, "Education": "Graduation", "Marital_Status": "Married", "Income": 82914, "Total_Spent": 1307, "Children": 0, "NumWebPurchases": 2, "NumStorePurchases": 13, "Cluster": 0, "PCA1": 3.67, "PCA2": -1.45}, {"ID": 1038, "Age": 49, "Education": "Graduation", "Marital_Status": "Married", "Income": 48123, "Total_Spent": 324, "Children": 2, "NumWebPurchases": 4, "NumStorePurchases": 6, "Cluster": 1, "PCA1": -1.48, "PCA2": -0.43}, {"ID": 1039, "Age": 35, "Education": "Master", "Marital_Status": "Together", "Income": 30173, "Total_Spent": 84, "Children": 1, "NumWebPurchases": 4, "NumStorePurchases": 2, "Cluster": 3, "PCA1": -3.32, "PCA2": 1.22}, {"ID": 1040, "Age": 67, "Education": "Graduation", "Marital_Status": "Together", "Income": 81450, "Total_Spent": 986, "Children": 1, "NumWebPurchases": 4, "NumStorePurchases": 7, "Cluster": 0, "PCA1": 1.96, "PCA2": -1.68}, {"ID": 1041, "Age": 41, "Education": "Graduation", "Marital_Status": "Married", "Income": 32340, "Total_Spent": 125, "Children": 1, "NumWebPurchases": 2, "NumStorePurchases": 2, "Cluster": 3, "PCA1": -2.92, "PCA2": 0.19}, {"ID": 1042, "Age": 54, "Education": "Graduation", "Marital_Status": "Married", "Income": 94709, "Total_Spent": 1240, "Children": 1, "NumWebPurchases": 3, "NumStorePurchases": 9, "Cluster": 0, "PCA1": 3.36, "PCA2": -1.18}, {"ID": 1043, "Age": 38, "Education": "Master", "Marital_Status": "Single", "Income": 63354, "Total_Spent": 768, "Children": 2, "NumWebPurchases": 6, "NumStorePurchases": 2, "Cluster": 2, "PCA1": -0.51, "PCA2": 1.55}, {"ID": 1044, "Age": 38, "Education": "Graduation", "Marital_Status": "Married", "Income": 34826, "Total_Spent": 90, "Children": 3, "NumWebPurchases": 2, "NumStorePurchases": 2, "Cluster": 3, "PCA1": -3.53, "PCA2": 0.21}, {"ID": 1045, "Age": 54, "Education": "Master", "Marital_Status": "Single", "Income": 56401, "Total_Spent": 563, "Children": 2, "NumWebPurchases": 4, "NumStorePurchases": 7, "Cluster": 1, "PCA1": -1.12, "PCA2": -0.93}, {"ID": 1046, "Age": 50, "Education": "Basic", "Marital_Status": "Together", "Income": 28953, "Total_Spent": 170, "Children": 0, "NumWebPurchases": 2, "NumStorePurchases": 2, "Cluster": 3, "PCA1": -3.55, "PCA2": -0.28}, {"ID": 1047, "Age": 43, "Education": "Basic", "Marital_Status": "Married", "Income": 25798, "Total_Spent": 135, "Children": 2, "NumWebPurchases": 1, "NumStorePurchases": 3, "Cluster": 3, "PCA1": -3.84, "PCA2": -0.15}, {"ID": 1048, "Age": 39, "Education": "Graduation", "Marital_Status": "Together", "Income": 38826, "Total_Spent": 122, "Children": 2, "NumWebPurchases": 2, "NumStorePurchases": 2, "Cluster": 3, "PCA1": -3.36, "PCA2": 0.62}, {"ID": 1049, "Age": 57, "Education": "Graduation", "Marital_Status": "Married", "Income": 77476, "Total_Spent": 1510, "Children": 1, "NumWebPurchases": 0, "NumStorePurchases": 13, "Cluster": 0, "PCA1": 3.4, "PCA2": -2.2}, {"ID": 1050, "Age": 34, "Education": "PhD", "Marital_Status": "Married", "Income": 87091, "Total_Spent": 1047, "Children": 1, "NumWebPurchases": 7, "NumStorePurchases": 6, "Cluster": 2, "PCA1": 1.35, "PCA2": 1.94}, {"ID": 1051, "Age": 72, "Education": "Master", "Marital_Status": "Married", "Income": 48332, "Total_Spent": 388, "Children": 2, "NumWebPurchases": 4, "NumStorePurchases": 8, "Cluster": 1, "PCA1": -0.9, "PCA2": -1.8}, {"ID": 1052, "Age": 34, "Education": "PhD", "Marital_Status": "Single", "Income": 67968, "Total_Spent": 816, "Children": 0, "NumWebPurchases": 8, "NumStorePurchases": 7, "Cluster": 2, "PCA1": 1.32, "PCA2": 2.17}, {"ID": 1053, "Age": 38, "Education": "Graduation", "Marital_Status": "Married", "Income": 52574, "Total_Spent": 652, "Children": 0, "NumWebPurchases": 10, "NumStorePurchases": 3, "Cluster": 2, "PCA1": 0.19, "PCA2": 2.89}, {"ID": 1054, "Age": 56, "Education": "Graduation", "Marital_Status": "Together", "Income": 55857, "Total_Spent": 570, "Children": 2, "NumWebPurchases": 5, "NumStorePurchases": 6, "Cluster": 1, "PCA1": -1.22, "PCA2": -0.42}, {"ID": 1055, "Age": 31, "Education": "Graduation", "Marital_Status": "Together", "Income": 69310, "Total_Spent": 970, "Children": 0, "NumWebPurchases": 7, "NumStorePurchases": 6, "Cluster": 2, "PCA1": 0.94, "PCA2": 2.88}, {"ID": 1056, "Age": 55, "Education": "Graduation", "Marital_Status": "Married", "Income": 84060, "Total_Spent": 1205, "Children": 1, "NumWebPurchases": 8, "NumStorePurchases": 8, "Cluster": 0, "PCA1": 3.08, "PCA2": 0.23}, {"ID": 1057, "Age": 56, "Education": "Graduation", "Marital_Status": "Married", "Income": 77751, "Total_Spent": 1587, "Children": 1, "NumWebPurchases": 7, "NumStorePurchases": 6, "Cluster": 0, "PCA1": 4.58, "PCA2": -0.36}, {"ID": 1058, "Age": 67, "Education": "Graduation", "Marital_Status": "Together", "Income": 84168, "Total_Spent": 1289, "Children": 2, "NumWebPurchases": 3, "NumStorePurchases": 8, "Cluster": 0, "PCA1": 3.18, "PCA2": -2.01}, {"ID": 1059, "Age": 66, "Education": "Graduation", "Marital_Status": "Together", "Income": 45554, "Total_Spent": 154, "Children": 4, "NumWebPurchases": 3, "NumStorePurchases": 3, "Cluster": 3, "PCA1": -3.55, "PCA2": -1.5}, {"ID": 1060, "Age": 52, "Education": "Graduation", "Marital_Status": "Together", "Income": 25198, "Total_Spent": 86, "Children": 3, "NumWebPurchases": 1, "NumStorePurchases": 4, "Cluster": 3, "PCA1": -3.67, "PCA2": -1.41}, {"ID": 1061, "Age": 45, "Education": "Graduation", "Marital_Status": "Married", "Income": 19009, "Total_Spent": 74, "Children": 2, "NumWebPurchases": 1, "NumStorePurchases": 1, "Cluster": 3, "PCA1": -3.69, "PCA2": 0.13}, {"ID": 1062, "Age": 42, "Education": "Graduation", "Marital_Status": "Single", "Income": 67670, "Total_Spent": 925, "Children": 0, "NumWebPurchases": 11, "NumStorePurchases": 1, "Cluster": 2, "PCA1": 1.09, "PCA2": 3.24}, {"ID": 1063, "Age": 59, "Education": "Graduation", "Marital_Status": "Single", "Income": 33174, "Total_Spent": 60, "Children": 0, "NumWebPurchases": 1, "NumStorePurchases": 4, "Cluster": 3, "PCA1": -3.13, "PCA2": -0.88}, {"ID": 1064, "Age": 56, "Education": "Basic", "Marital_Status": "Together", "Income": 33837, "Total_Spent": 150, "Children": 3, "NumWebPurchases": 2, "NumStorePurchases": 1, "Cluster": 3, "PCA1": -3.71, "PCA2": -0.69}, {"ID": 1065, "Age": 51, "Education": "Graduation", "Marital_Status": "Together", "Income": 28848, "Total_Spent": 94, "Children": 0, "NumWebPurchases": 1, "NumStorePurchases": 2, "Cluster": 3, "PCA1": -3.64, "PCA2": -0.31}, {"ID": 1066, "Age": 44, "Education": "Graduation", "Marital_Status": "Married", "Income": 88055, "Total_Spent": 1575, "Children": 1, "NumWebPurchases": 6, "NumStorePurchases": 9, "Cluster": 0, "PCA1": 3.7, "PCA2": -0.13}, {"ID": 1067, "Age": 48, "Education": "Graduation", "Marital_Status": "Single", "Income": 45220, "Total_Spent": 838, "Children": 0, "NumWebPurchases": 6, "NumStorePurchases": 5, "Cluster": 2, "PCA1": 0.14, "PCA2": 0.98}, {"ID": 1068, "Age": 70, "Education": "Graduation", "Marital_Status": "Married", "Income": 75473, "Total_Spent": 1256, "Children": 1, "NumWebPurchases": 0, "NumStorePurchases": 8, "Cluster": 0, "PCA1": 2.45, "PCA2": -3.03}, {"ID": 1069, "Age": 42, "Education": "Graduation", "Marital_Status": "Together", "Income": 81122, "Total_Spent": 986, "Children": 1, "NumWebPurchases": 6, "NumStorePurchases": 6, "Cluster": 2, "PCA1": 1.55, "PCA2": 0.81}, {"ID": 1070, "Age": 45, "Education": "Graduation", "Marital_Status": "Married", "Income": 62982, "Total_Spent": 530, "Children": 2, "NumWebPurchases": 2, "NumStorePurchases": 9, "Cluster": 1, "PCA1": -1.08, "PCA2": -0.78}, {"ID": 1071, "Age": 37, "Education": "PhD", "Marital_Status": "Together", "Income": 64949, "Total_Spent": 1494, "Children": 0, "NumWebPurchases": 5, "NumStorePurchases": 3, "Cluster": 0, "PCA1": 2.76, "PCA2": 0.67}, {"ID": 1072, "Age": 48, "Education": "Master", "Marital_Status": "Together", "Income": 81275, "Total_Spent": 1503, "Children": 0, "NumWebPurchases": 7, "NumStorePurchases": 9, "Cluster": 0, "PCA1": 4.28, "PCA2": 0.13}, {"ID": 1073, "Age": 49, "Education": "PhD", "Marital_Status": "Single", "Income": 72138, "Total_Spent": 730, "Children": 0, "NumWebPurchases": 7, "NumStorePurchases": 5, "Cluster": 2, "PCA1": 0.01, "PCA2": 1.21}, {"ID": 1074, "Age": 65, "Education": "Graduation", "Marital_Status": "Married", "Income": 63009, "Total_Spent": 429, "Children": 1, "NumWebPurchases": 7, "NumStorePurchases": 9, "Cluster": 1, "PCA1": -0.39, "PCA2": -0.41}, {"ID": 1075, "Age": 40, "Education": "Graduation", "Marital_Status": "Together", "Income": 50756, "Total_Spent": 393, "Children": 2, "NumWebPurchases": 4, "NumStorePurchases": 6, "Cluster": 1, "PCA1": -1.56, "PCA2": 0.4}, {"ID": 1076, "Age": 46, "Education": "Graduation", "Marital_Status": "Married", "Income": 49164, "Total_Spent": 445, "Children": 0, "NumWebPurchases": 5, "NumStorePurchases": 7, "Cluster": 1, "PCA1": -0.56, "PCA2": 1.11}, {"ID": 1077, "Age": 48, "Education": "Graduation", "Marital_Status": "Married", "Income": 87216, "Total_Spent": 1609, "Children": 0, "NumWebPurchases": 5, "NumStorePurchases": 10, "Cluster": 0, "PCA1": 3.67, "PCA2": -0.22}, {"ID": 1078, "Age": 40, "Education": "Basic", "Marital_Status": "Together", "Income": 25013, "Total_Spent": 86, "Children": 3, "NumWebPurchases": 3, "NumStorePurchases": 2, "Cluster": 3, "PCA1": -3.79, "PCA2": 0.03}, {"ID": 1079, "Age": 51, "Education": "Master", "Marital_Status": "Married", "Income": 96707, "Total_Spent": 1144, "Children": 0, "NumWebPurchases": 5, "NumStorePurchases": 14, "Cluster": 0, "PCA1": 4.13, "PCA2": -0.17}, {"ID": 1080, "Age": 28, "Education": "PhD", "Marital_Status": "Together", "Income": 58185, "Total_Spent": 775, "Children": 1, "NumWebPurchases": 6, "NumStorePurchases": 8, "Cluster": 2, "PCA1": 0.39, "PCA2": 2.54}, {"ID": 1081, "Age": 56, "Education": "Graduation", "Marital_Status": "Married", "Income": 55147, "Total_Spent": 467, "Children": 2, "NumWebPurchases": 2, "NumStorePurchases": 5, "Cluster": 1, "PCA1": -0.92, "PCA2": -1.22}, {"ID": 1082, "Age": 48, "Education": "Basic", "Marital_Status": "Together", "Income": 36906, "Total_Spent": 133, "Children": 1, "NumWebPurchases": 2, "NumStorePurchases": 3, "Cluster": 3, "PCA1": -2.48, "PCA2": -0.19}, {"ID": 1083, "Age": 51, "Education": "Master", "Marital_Status": "Married", "Income": 104085, "Total_Spent": 1388, "Children": 0, "NumWebPurchases": 7, "NumStorePurchases": 11, "Cluster": 0, "PCA1": 4.38, "PCA2": 0.39}, {"ID": 1084, "Age": 40, "Education": "Graduation", "Marital_Status": "Married", "Income": 33900, "Total_Spent": 90, "Children": 1, "NumWebPurchases": 4, "NumStorePurchases": 3, "Cluster": 3, "PCA1": -2.82, "PCA2": 1.39}, {"ID": 1085, "Age": 36, "Education": "Basic", "Marital_Status": "Single", "Income": 43897, "Total_Spent": 128, "Children": 1, "NumWebPurchases": 0, "NumStorePurchases": 2, "Cluster": 3, "PCA1": -3.4, "PCA2": 0.08}, {"ID": 1086, "Age": 59, "Education": "Graduation", "Marital_Status": "Married", "Income": 47035, "Total_Spent": 422, "Children": 1, "NumWebPurchases": 6, "NumStorePurchases": 6, "Cluster": 1, "PCA1": -0.88, "PCA2": -0.28}, {"ID": 1087, "Age": 41, "Education": "Graduation", "Marital_Status": "Married", "Income": 61820, "Total_Spent": 440, "Children": 2, "NumWebPurchases": 9, "NumStorePurchases": 6, "Cluster": 1, "PCA1": -0.5, "PCA2": 1.21}, {"ID": 1088, "Age": 50, "Education": "Graduation", "Marital_Status": "Married", "Income": 70630, "Total_Spent": 963, "Children": 0, "NumWebPurchases": 8, "NumStorePurchases": 6, "Cluster": 2, "PCA1": 1.29, "PCA2": 1.78}, {"ID": 1089, "Age": 67, "Education": "Master", "Marital_Status": "Single", "Income": 32774, "Total_Spent": 101, "Children": 1, "NumWebPurchases": 0, "NumStorePurchases": 3, "Cluster": 3, "PCA1": -2.74, "PCA2": -1.18}, {"ID": 1090, "Age": 38, "Education": "Graduation", "Marital_Status": "Single", "Income": 71822, "Total_Spent": 1057, "Children": 0, "NumWebPurchases": 3, "NumStorePurchases": 4, "Cluster": 2, "PCA1": 2.07, "PCA2": 0.62}, {"ID": 1091, "Age": 50, "Education": "Graduation", "Marital_Status": "Together", "Income": 46948, "Total_Spent": 359, "Children": 2, "NumWebPurchases": 4, "NumStorePurchases": 5, "Cluster": 1, "PCA1": -1.49, "PCA2": -0.23}, {"ID": 1092, "Age": 45, "Education": "Basic", "Marital_Status": "Together", "Income": 58241, "Total_Spent": 408, "Children": 2, "NumWebPurchases": 5, "NumStorePurchases": 8, "Cluster": 1, "PCA1": -1.07, "PCA2": 0.28}, {"ID": 1093, "Age": 49, "Education": "PhD", "Marital_Status": "Married", "Income": 60911, "Total_Spent": 629, "Children": 1, "NumWebPurchases": 5, "NumStorePurchases": 4, "Cluster": 1, "PCA1": -0.41, "PCA2": 0.66}, {"ID": 1094, "Age": 24, "Education": "Master", "Marital_Status": "Together", "Income": 53705, "Total_Spent": 475, "Children": 2, "NumWebPurchases": 5, "NumStorePurchases": 4, "Cluster": 1, "PCA1": -1.54, "PCA2": 1.71}, {"ID": 1095, "Age": 63, "Education": "Graduation", "Marital_Status": "Married", "Income": 22219, "Total_Spent": 138, "Children": 2, "NumWebPurchases": 3, "NumStorePurchases": 3, "Cluster": 3, "PCA1": -3.86, "PCA2": -1.03}, {"ID": 1096, "Age": 36, "Education": "Basic", "Marital_Status": "Together", "Income": 34076, "Total_Spent": 120, "Children": 0, "NumWebPurchases": 4, "NumStorePurchases": 4, "Cluster": 3, "PCA1": -2.65, "PCA2": 0.87}, {"ID": 1097, "Age": 46, "Education": "Basic", "Marital_Status": "Together", "Income": 36589, "Total_Spent": 112, "Children": 2, "NumWebPurchases": 3, "NumStorePurchases": 3, "Cluster": 3, "PCA1": -2.8, "PCA2": -0.11}, {"ID": 1098, "Age": 62, "Education": "PhD", "Marital_Status": "Together", "Income": 68266, "Total_Spent": 1575, "Children": 1, "NumWebPurchases": 5, "NumStorePurchases": 8, "Cluster": 0, "PCA1": 2.67, "PCA2": -1.01}, {"ID": 1099, "Age": 56, "Education": "PhD", "Marital_Status": "Single", "Income": 78800, "Total_Spent": 1664, "Children": 0, "NumWebPurchases": 6, "NumStorePurchases": 6, "Cluster": 0, "PCA1": 4.34, "PCA2": -0.85}, {"ID": 1100, "Age": 64, "Education": "Master", "Marital_Status": "Married", "Income": 80282, "Total_Spent": 1677, "Children": 0, "NumWebPurchases": 5, "NumStorePurchases": 9, "Cluster": 0, "PCA1": 4.48, "PCA2": -1.26}, {"ID": 1101, "Age": 38, "Education": "Graduation", "Marital_Status": "Single", "Income": 59629, "Total_Spent": 576, "Children": 2, "NumWebPurchases": 4, "NumStorePurchases": 7, "Cluster": 1, "PCA1": -0.59, "PCA2": 0.05}, {"ID": 1102, "Age": 48, "Education": "Master", "Marital_Status": "Divorced", "Income": 28595, "Total_Spent": 114, "Children": 1, "NumWebPurchases": 3, "NumStorePurchases": 4, "Cluster": 3, "PCA1": -3.15, "PCA2": 0.13}, {"ID": 1103, "Age": 45, "Education": "Basic", "Marital_Status": "Single", "Income": 14293, "Total_Spent": 100, "Children": 1, "NumWebPurchases": 3, "NumStorePurchases": 3, "Cluster": 3, "PCA1": -3.52, "PCA2": 0.56}, {"ID": 1104, "Age": 36, "Education": "PhD", "Marital_Status": "Single", "Income": 60163, "Total_Spent": 860, "Children": 0, "NumWebPurchases": 8, "NumStorePurchases": 3, "Cluster": 2, "PCA1": 0.33, "PCA2": 2.85}, {"ID": 1105, "Age": 63, "Education": "Graduation", "Marital_Status": "Married", "Income": 78437, "Total_Spent": 1612, "Children": 0, "NumWebPurchases": 5, "NumStorePurchases": 11, "Cluster": 0, "PCA1": 4.28, "PCA2": -1.31}, {"ID": 1106, "Age": 56, "Education": "Graduation", "Marital_Status": "Together", "Income": 28807, "Total_Spent": 125, "Children": 1, "NumWebPurchases": 2, "NumStorePurchases": 3, "Cluster": 3, "PCA1": -3.44, "PCA2": -0.78}, {"ID": 1107, "Age": 63, "Education": "Graduation", "Marital_Status": "Single", "Income": 49964, "Total_Spent": 543, "Children": 1, "NumWebPurchases": 2, "NumStorePurchases": 9, "Cluster": 1, "PCA1": -0.6, "PCA2": -1.18}, {"ID": 1108, "Age": 55, "Education": "Graduation", "Marital_Status": "Married", "Income": 77264, "Total_Spent": 1241, "Children": 0, "NumWebPurchases": 4, "NumStorePurchases": 10, "Cluster": 0, "PCA1": 2.76, "PCA2": -0.82}, {"ID": 1109, "Age": 56, "Education": "PhD", "Marital_Status": "Married", "Income": 94436, "Total_Spent": 1740, "Children": 0, "NumWebPurchases": 5, "NumStorePurchases": 7, "Cluster": 0, "PCA1": 4.69, "PCA2": -0.73}, {"ID": 1110, "Age": 56, "Education": "Graduation", "Marital_Status": "Together", "Income": 35743, "Total_Spent": 134, "Children": 3, "NumWebPurchases": 3, "NumStorePurchases": 4, "Cluster": 3, "PCA1": -3.49, "PCA2": -0.78}, {"ID": 1111, "Age": 56, "Education": "Graduation", "Marital_Status": "Married", "Income": 87465, "Total_Spent": 1675, "Children": 0, "NumWebPurchases": 5, "NumStorePurchases": 11, "Cluster": 0, "PCA1": 5.46, "PCA2": -0.64}, {"ID": 1112, "Age": 44, "Education": "Graduation", "Marital_Status": "Single", "Income": 69800, "Total_Spent": 1088, "Children": 0, "NumWebPurchases": 8, "NumStorePurchases": 7, "Cluster": 2, "PCA1": 1.22, "PCA2": 1.81}, {"ID": 1113, "Age": 46, "Education": "Graduation", "Marital_Status": "Married", "Income": 52775, "Total_Spent": 911, "Children": 0, "NumWebPurchases": 8, "NumStorePurchases": 7, "Cluster": 2, "PCA1": 2.15, "PCA2": 1.53}, {"ID": 1114, "Age": 71, "Education": "Master", "Marital_Status": "Together", "Income": 58632, "Total_Spent": 384, "Children": 1, "NumWebPurchases": 3, "NumStorePurchases": 0, "Cluster": 1, "PCA1": -1.49, "PCA2": -1.57}, {"ID": 1115, "Age": 52, "Education": "Graduation", "Marital_Status": "Single", "Income": 74354, "Total_Spent": 981, "Children": 0, "NumWebPurchases": 10, "NumStorePurchases": 4, "Cluster": 2, "PCA1": 1.82, "PCA2": 1.25}, {"ID": 1116, "Age": 39, "Education": "Master", "Marital_Status": "Married", "Income": 72239, "Total_Spent": 827, "Children": 1, "NumWebPurchases": 7, "NumStorePurchases": 4, "Cluster": 2, "PCA1": 0.66, "PCA2": 1.72}, {"ID": 1117, "Age": 49, "Education": "Master", "Marital_Status": "Married", "Income": 84376, "Total_Spent": 1680, "Children": 1, "NumWebPurchases": 4, "NumStorePurchases": 10, "Cluster": 0, "PCA1": 3.84, "PCA2": -1.01}, {"ID": 1118, "Age": 42, "Education": "PhD", "Marital_Status": "Married", "Income": 52173, "Total_Spent": 856, "Children": 1, "NumWebPurchases": 8, "NumStorePurchases": 8, "Cluster": 2, "PCA1": 1.02, "PCA2": 1.6}, {"ID": 1119, "Age": 39, "Education": "Graduation", "Marital_Status": "Together", "Income": 28369, "Total_Spent": 105, "Children": 2, "NumWebPurchases": 3, "NumStorePurchases": 4, "Cluster": 3, "PCA1": -3.7, "PCA2": 0.02}]};
+
+    // State management
+    let state = {
+      activeTab: 'tab-overview',
+      activeCodeSnippet: 'train',
+      tableSearch: '',
+      tableClusterFilter: 'all',
+      currentPage: 1,
+      rowsPerPage: 10,
+      charts: {}
+    };
+
+    // Code Snippets
+    const CODE_SNIPPETS = {
+      train: `"""
+Customer Personality Segmentation - Model Training Pipeline
+Dataset: Customer Personality Analysis (Kaggle)
+Algorithm: K-Means Clustering + Principal Component Analysis (PCA)
+"""
+
+import os
+import json
+import joblib
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+def load_and_preprocess(filepath: str) -> pd.DataFrame:
+    df = pd.read_csv(filepath)
+    df['Income'] = df['Income'].fillna(df['Income'].median())
+    
+    # Feature Engineering
+    df['Age'] = 2026 - df['Year_Birth']
+    df = df[(df['Age'] > 18) & (df['Age'] < 95)]
+    df = df[df['Income'] < 200000]
+    
+    spend_cols = ['MntWines', 'MntFruits', 'MntMeatProducts', 'MntFishProducts', 'MntSweetProducts', 'MntGoldProds']
+    df['Total_Spent'] = df[spend_cols].sum(axis=1)
+    df['Children'] = df['Kidhome'] + df['Teenhome']
+    df['Total_Purchases'] = df['NumDealsPurchases'] + df['NumWebPurchases'] + df['NumCatalogPurchases'] + df['NumStorePurchases']
+    return df
+
+def train_clustering_pipeline(df: pd.DataFrame, n_clusters: int = 4):
+    features = [
+        'Income', 'Age', 'Total_Spent', 'Children',
+        'MntWines', 'MntMeatProducts', 'MntGoldProds',
+        'NumDealsPurchases', 'NumWebPurchases', 'NumCatalogPurchases', 'NumStorePurchases',
+        'NumWebVisitsMonth'
+    ]
+    X = df[features]
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+    
+    # Evaluate optimal k via Silhouette Score
+    for k in range(2, 7):
+        km = KMeans(n_clusters=k, random_state=42, n_init=10)
+        labels = km.fit_predict(X_scaled)
+        print(f"k={k} | Silhouette: {silhouette_score(X_scaled, labels):.4f}")
+    
+    # Fit Final K-Means & PCA
+    kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+    df['Cluster'] = kmeans.fit_predict(X_scaled)
+    pca = PCA(n_components=2, random_state=42)
+    X_pca = pca.fit_transform(X_scaled)
+    
+    # Persist artifacts
+    os.makedirs('models', exist_ok=True)
+    joblib.dump(scaler, 'models/scaler.joblib')
+    joblib.dump(kmeans, 'models/kmeans_model.joblib')
+    joblib.dump(pca, 'models/pca_model.joblib')
+    print("Training complete. Artifacts saved.")
+
+if __name__ == '__main__':
+    train_clustering_pipeline(load_and_preprocess('customer_segmentation_data.csv'))`,
+      api: `from fastapi import FastAPI
+from pydantic import BaseModel
+import joblib, numpy as np
+
+app = FastAPI(title="Customer Segmentation API")
+
+scaler = joblib.load('models/scaler.joblib')
+kmeans = joblib.load('models/kmeans_model.joblib')
+
+class CustomerInput(BaseModel):
+    Age: int
+    Income: float
+    Children: int
+    MntWines: float
+    MntFruits: float
+    MntMeatProducts: float
+    MntFishProducts: float
+    MntSweetProducts: float
+    MntGoldProds: float
+    NumDealsPurchases: int
+    NumWebPurchases: int
+    NumCatalogPurchases: int
+    NumStorePurchases: int
+    NumWebVisitsMonth: int
+
+@app.post("/api/predict")
+def predict_segment(c: CustomerInput):
+    total_spent = c.MntWines + c.MntFruits + c.MntMeatProducts + c.MntFishProducts + c.MntSweetProducts + c.MntGoldProds
+    vec = np.array([c.Income, c.Age, total_spent, c.Children, c.MntWines, c.MntMeatProducts,
+                    c.MntGoldProds, c.NumDealsPurchases, c.NumWebPurchases, c.NumCatalogPurchases,
+                    c.NumStorePurchases, c.NumWebVisitsMonth]).reshape(1, -1)
+    scaled = scaler.transform(vec)
+    cluster = int(kmeans.predict(scaled)[0])
+    return {"cluster_id": cluster}`,
+      reqs: `pandas>=2.0.0\nnumpy>=1.24.0\nscikit-learn>=1.3.0\nscipy>=1.11.0\nmatplotlib>=3.7.0\nseaborn>=0.12.0\nfastapi>=0.100.0\nuvicorn>=0.23.0\npydantic>=2.0.0\njoblib>=1.3.0`,
+      readme: `# Customer Personality Segmentation ML
+Unsupervised behavioral clustering on customer demographics & transactions.
+1. Run \`python train_model.py\` to train K-Means and PCA.
+2. Run \`python app_api.py\` to start FastAPI inference engine.
+3. Open \`frontend/index.html\` to explore the interactive dashboard.`
+    };
+
+    // Helper Toast
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'px-4 py-2.5 rounded-lg text-xs font-semibold text-white shadow-lg transition-all duration-300 transform translate-y-2 opacity-0 flex items-center gap-2 pointer-events-auto ' + 
+        (type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-red-600' : 'bg-slate-800'));
+      toast.innerHTML = `<i data-lucide="info" class="w-4 h-4"></i> <span>` + msg + `</span>`;
+      container.appendChild(toast);
+      if (window.lucide) window.lucide.createIcons();
+      
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 10);
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    // Initialize UI
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) window.lucide.createIcons();
+      setupTabs();
+      setupPresets();
+      setupPredictor();
+      setupSimulator();
+      setupDatasetTable();
+      setupCodeViewer();
+      setupDownloads();
+      
+      // Render Charts
+      initOverviewCharts();
+      renderPersonasTab();
+      initClusteringCharts();
+      runPredictionCalculation();
+      runSimulation();
+    });
+
+    // Tab Navigation
+    function setupTabs() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach(t => {
+            t.classList.remove('active', 'text-indigo-600', 'bg-indigo-50', 'font-semibold');
+            t.classList.add('text-slate-600');
+          });
+          tab.classList.add('active', 'text-indigo-600', 'bg-indigo-50', 'font-semibold');
+          tab.classList.remove('text-slate-600');
+
+          const target = tab.getAttribute('data-tab');
+          document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+          const targetPane = document.getElementById(target);
+          if (targetPane) targetPane.classList.remove('hidden');
+
+          state.activeTab = target;
+          if (window.lucide) window.lucide.createIcons();
+        });
+      });
+
+      const quickPredictBtn = document.getElementById('btn-quick-predict');
+      if (quickPredictBtn) {
+        quickPredictBtn.addEventListener('click', () => {
+          const tab = document.querySelector('[data-tab="tab-predictor"]');
+          if (tab) tab.click();
+        });
+      }
+    }
+
+    // Overview Charts
+    function initOverviewCharts() {
+      // 1. Donut Chart - Distribution
+      const ctxDist = document.getElementById('chart-segment-distribution');
+      if (ctxDist) {
+        new Chart(ctxDist, {
+          type: 'doughnut',
+          data: {
+            labels: ['Stars / Luxury VIP', 'Frugal / Budget', 'Prudent Middle', 'Tech Professionals'],
+            datasets: [{
+              data: [25, 30, 25, 20],
+              backgroundColor: ['#6366f1', '#ef4444', '#10b981', '#f59e0b'],
+              borderWidth: 2,
+              borderColor: '#ffffff'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            cutout: '68%'
+          }
+        });
+      }
+
+      // 2. Spend Comparison Bar Chart
+      const ctxSpend = document.getElementById('chart-spend-comparison');
+      if (ctxSpend) {
+        new Chart(ctxSpend, {
+          type: 'bar',
+          data: {
+            labels: ['Wines', 'Meat', 'Gold', 'Fish', 'Fruits', 'Sweets'],
+            datasets: [
+              {
+                label: 'Stars (VIP)',
+                data: [680, 480, 90, 85, 65, 60],
+                backgroundColor: '#6366f1'
+              },
+              {
+                label: 'Frugal Budget',
+                data: [45, 25, 16, 10, 8, 7],
+                backgroundColor: '#ef4444'
+              },
+              {
+                label: 'Prudent Middle',
+                data: [260, 130, 35, 28, 22, 20],
+                backgroundColor: '#10b981'
+              },
+              {
+                label: 'Tech Savvy',
+                data: [420, 240, 65, 45, 38, 36],
+                backgroundColor: '#f59e0b'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }
+            },
+            scales: {
+              y: { beginAtZero: true, grid: { color: '#f1f5f9' }, title: { display: true, text: 'Average Spend (₹)' } },
+              x: { grid: { display: false } }
+            }
+          }
+        });
+      }
+
+      // 3. Channel Matrix
+      const ctxChannel = document.getElementById('chart-channel-matrix');
+      if (ctxChannel) {
+        new Chart(ctxChannel, {
+          type: 'bar',
+          data: {
+            labels: ['Physical Store', 'Web E-Commerce', 'Catalog Orders', 'Deals / Discount Orders', 'Web Visits / Month'],
+            datasets: [
+              {
+                label: 'Stars (VIP)',
+                data: [9.0, 5.0, 7.0, 1.2, 3.0],
+                backgroundColor: '#6366f1'
+              },
+              {
+                label: 'Frugal Budget',
+                data: [3.0, 2.5, 0.8, 5.0, 7.5],
+                backgroundColor: '#ef4444'
+              },
+              {
+                label: 'Prudent Middle',
+                data: [6.2, 4.8, 2.5, 3.2, 5.5],
+                backgroundColor: '#10b981'
+              },
+              {
+                label: 'Tech Savvy',
+                data: [6.5, 7.8, 4.2, 2.1, 6.8],
+                backgroundColor: '#f59e0b'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }
+            },
+            scales: {
+              y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+              x: { grid: { display: false } }
+            }
+          }
+        });
+      }
+    }
+
+    // Persona Tab Cards
+    function renderPersonasTab() {
+      const container = document.getElementById('personas-grid-container');
+      if (!container) return;
+
+      const profiles = ML_DATA.cluster_profiles;
+      container.innerHTML = Object.values(profiles).map(p => `
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+          <div>
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold" style="background-color: ${p.color}15; color: ${p.color}; border: 1px solid ${p.color}40">
+                Cluster ${p.id} • ${p.percentage}% Audience
+              </span>
+              <span class="text-xs text-slate-400 font-medium">Avg Age: ${p.avg_age}</span>
+            </div>
+
+            <h3 class="text-lg font-bold text-slate-900 mt-3">${p.name}</h3>
+            <p class="text-xs text-slate-600 mt-1 leading-relaxed">${p.description}</p>
+
+            <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+              <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                <span class="text-[10px] uppercase font-bold text-slate-400 block">Avg Income</span>
+                <span class="font-bold text-slate-800 text-sm">₹${p.avg_income.toLocaleString()}</span>
+              </div>
+              <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                <span class="text-[10px] uppercase font-bold text-slate-400 block">Total Spend</span>
+                <span class="font-bold text-slate-800 text-sm">₹${p.avg_spent.toLocaleString()}</span>
+              </div>
+              <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                <span class="text-[10px] uppercase font-bold text-slate-400 block">Campaign Fit</span>
+                <span class="font-bold text-emerald-600 text-sm">${p.campaign_response_rate}%</span>
+              </div>
+            </div>
+
+            <!-- Key Traits -->
+            <div class="mt-4 space-y-2 text-xs">
+              <div class="flex justify-between text-slate-600">
+                <span>Wine & Luxury Spend:</span>
+                <span class="font-semibold text-slate-800">₹${p.avg_wines}</span>
+              </div>
+              <div class="flex justify-between text-slate-600">
+                <span>Children per Household:</span>
+                <span class="font-semibold text-slate-800">${p.avg_children}</span>
+              </div>
+              <div class="flex justify-between text-slate-600">
+                <span>Preferred Shopping:</span>
+                <span class="font-semibold text-indigo-600">${p.top_channels.join(', ')}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-4 border-t border-slate-100">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Tailored Marketing Action</span>
+            <p class="text-xs font-semibold text-slate-800">${p.marketing_strategy}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Live Predictor Logic
+    function setupPresets() {
+      const presets = {
+        stars: { age: 52, income: 88000, children: 0, wines: 750, meat: 520, gold: 110, fruits: 70, fish: 95, sweets: 65, web: 5, catalog: 8, store: 10, deals: 1, webvisits: 2 },
+        frugal: { age: 44, income: 28000, children: 2, wines: 30, meat: 18, gold: 12, fruits: 6, fish: 8, sweets: 5, web: 2, catalog: 0, store: 3, deals: 6, webvisits: 8 },
+        middle: { age: 49, income: 54000, children: 1, wines: 280, meat: 140, gold: 38, fruits: 25, fish: 30, sweets: 22, web: 5, catalog: 3, store: 7, deals: 3, webvisits: 5 },
+        tech: { age: 36, income: 71000, children: 0, wines: 460, meat: 260, gold: 75, fruits: 42, fish: 50, sweets: 40, web: 9, catalog: 5, store: 6, deals: 2, webvisits: 7 }
+      };
+
+      document.querySelectorAll('.btn-preset').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const key = btn.getAttribute('data-preset');
+          const data = presets[key];
+          if (!data) return;
+
+          document.getElementById('inp-age').value = data.age;
+          document.getElementById('inp-income').value = data.income;
+          document.getElementById('inp-children').value = data.children;
+          document.getElementById('inp-wines').value = data.wines;
+          document.getElementById('inp-meat').value = data.meat;
+          document.getElementById('inp-gold').value = data.gold;
+          document.getElementById('inp-fruits').value = data.fruits;
+          document.getElementById('inp-fish').value = data.fish;
+          document.getElementById('inp-sweets').value = data.sweets;
+          document.getElementById('inp-web').value = data.web;
+          document.getElementById('inp-catalog').value = data.catalog;
+          document.getElementById('inp-store').value = data.store;
+          document.getElementById('inp-deals').value = data.deals;
+          document.getElementById('inp-webvisits').value = data.webvisits;
+          document.getElementById('val-webvisits').innerText = data.webvisits;
+
+          runPredictionCalculation();
+          showToast(`Loaded ${key.toUpperCase()} preset customer`, 'info');
+        });
+      });
+
+      const webVisitsSlider = document.getElementById('inp-webvisits');
+      if (webVisitsSlider) {
+        webVisitsSlider.addEventListener('input', (e) => {
+          document.getElementById('val-webvisits').innerText = e.target.value;
+        });
+      }
+
+      const resetBtn = document.getElementById('btn-reset-form');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          presets.middle && Object.keys(presets.middle).forEach(k => {
+            const el = document.getElementById('inp-' + k);
+            if (el) el.value = presets.middle[k];
+          });
+          document.getElementById('val-webvisits').innerText = 5;
+          runPredictionCalculation();
+          showToast('Form reset to default baseline', 'info');
+        });
+      }
+    }
+
+    function setupPredictor() {
+      const runBtn = document.getElementById('btn-run-prediction');
+      if (runBtn) {
+        runBtn.addEventListener('click', () => {
+          runPredictionCalculation();
+          showToast('Customer segment calculated!', 'success');
+        });
+      }
+    }
+
+    function runPredictionCalculation() {
+      // Collect input values
+      const age = parseFloat(document.getElementById('inp-age').value) || 45;
+      const income = parseFloat(document.getElementById('inp-income').value) || 50000;
+      const children = parseFloat(document.getElementById('inp-children').value) || 0;
+      const wines = parseFloat(document.getElementById('inp-wines').value) || 0;
+      const meat = parseFloat(document.getElementById('inp-meat').value) || 0;
+      const gold = parseFloat(document.getElementById('inp-gold').value) || 0;
+      const fruits = parseFloat(document.getElementById('inp-fruits').value) || 0;
+      const fish = parseFloat(document.getElementById('inp-fish').value) || 0;
+      const sweets = parseFloat(document.getElementById('inp-sweets').value) || 0;
+      const web = parseFloat(document.getElementById('inp-web').value) || 0;
+      const catalog = parseFloat(document.getElementById('inp-catalog').value) || 0;
+      const store = parseFloat(document.getElementById('inp-store').value) || 0;
+      const deals = parseFloat(document.getElementById('inp-deals').value) || 0;
+      const webvisits = parseFloat(document.getElementById('inp-webvisits').value) || 0;
+
+      const totalSpent = wines + meat + gold + fruits + fish + sweets;
+      document.getElementById('pred-total-spend').innerText = '₹' + Math.round(totalSpent).toLocaleString();
+
+      // Feature order:
+      // ['Income', 'Age', 'Total_Spent', 'Children', 'MntWines', 'MntMeatProducts', 'MntGoldProds',
+      //  'NumDealsPurchases', 'NumWebPurchases', 'NumCatalogPurchases', 'NumStorePurchases', 'NumWebVisitsMonth']
+      const userVector = [income, age, totalSpent, children, wines, meat, gold, deals, web, catalog, store, webvisits];
+
+      // Standardize user vector
+      const scaledVector = userVector.map((val, idx) => {
+        const mean = ML_DATA.means[idx];
+        const std = ML_DATA.stds[idx];
+        return (val - mean) / std;
+      });
+
+      // Calculate Euclidean distance to each cluster centroid
+      let bestCluster = 0;
+      let minDistance = Infinity;
+      const distances = [];
+
+      ML_DATA.centroids_scaled.forEach((centroid, cIdx) => {
+        let sumSq = 0;
+        for (let i = 0; i < centroid.length; i++) {
+          sumSq += Math.pow(scaledVector[i] - centroid[i], 2);
+        }
+        const dist = Math.sqrt(sumSq);
+        distances.push(dist);
+        if (dist < minDistance) {
+          minDistance = dist;
+          bestCluster = cIdx;
+        }
+      });
+
+      const clusterInfo = ML_DATA.cluster_profiles[bestCluster];
+
+      // Update UI
+      const badge = document.getElementById('pred-badge');
+      badge.innerText = `Cluster ${bestCluster} Assigned`;
+      badge.style.backgroundColor = clusterInfo.color + '20';
+      badge.style.color = clusterInfo.color;
+      badge.style.borderColor = clusterInfo.color + '50';
+
+      document.getElementById('pred-cluster-name').innerText = clusterInfo.name;
+      document.getElementById('pred-cluster-desc').innerText = clusterInfo.description;
+      document.getElementById('pred-marketing-play').innerText = clusterInfo.marketing_strategy;
+
+      const sensMap = { 0: 'Very Low', 1: 'High', 2: 'Moderate', 3: 'Medium-Low' };
+      document.getElementById('pred-discount-sens').innerText = sensMap[bestCluster];
+      document.getElementById('pred-optimal-channel').innerText = clusterInfo.top_channels.join(' & ');
+
+      // Update Radar Chart
+      updatePredictionRadar(userVector, clusterInfo);
+    }
+
+    function updatePredictionRadar(userVec, clusterInfo) {
+      const radarLabels = ['Income (₹)', 'Wine Spend', 'Meat Spend', 'Store Orders', 'Web Orders', 'Deals'];
+      
+      // Normalized indices: Income(0), Wine(4), Meat(5), Store(10), Web(8), Deals(7)
+      const userVals = [
+        Math.min(100, (userVec[0] / 90000) * 100),
+        Math.min(100, (userVec[4] / 700) * 100),
+        Math.min(100, (userVec[5] / 500) * 100),
+        Math.min(100, (userVec[10] / 10) * 100),
+        Math.min(100, (userVec[8] / 10) * 100),
+        Math.min(100, (userVec[7] / 6) * 100)
+      ];
+
+      const clusterVals = [
+        Math.min(100, (clusterInfo.avg_income / 90000) * 100),
+        Math.min(100, (clusterInfo.avg_wines / 700) * 100),
+        Math.min(100, (clusterInfo.avg_meat / 500) * 100),
+        Math.min(100, (clusterInfo.avg_store_purchases / 10) * 100),
+        Math.min(100, (clusterInfo.avg_web_purchases / 10) * 100),
+        Math.min(100, (clusterInfo.avg_deal_purchases / 6) * 100)
+      ];
+
+      const ctxRadar = document.getElementById('chart-prediction-radar');
+      if (!ctxRadar) return;
+
+      if (state.charts.radar) {
+        state.charts.radar.destroy();
+      }
+
+      state.charts.radar = new Chart(ctxRadar, {
+        type: 'radar',
+        data: {
+          labels: radarLabels,
+          datasets: [
+            {
+              label: 'Selected Customer',
+              data: userVals,
+              borderColor: '#4f46e5',
+              backgroundColor: 'rgba(79, 70, 229, 0.25)',
+              pointBackgroundColor: '#4f46e5'
+            },
+            {
+              label: `${clusterInfo.name} Baseline`,
+              data: clusterVals,
+              borderColor: clusterInfo.color,
+              backgroundColor: `${clusterInfo.color}15`,
+              borderDash: [4, 4],
+              pointBackgroundColor: clusterInfo.color
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              suggestedMin: 0,
+              suggestedMax: 100,
+              ticks: { display: false },
+              grid: { color: '#e2e8f0' },
+              pointLabels: { font: { size: 10, weight: '600' } }
+            }
+          },
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }
+          }
+        }
+      });
+    }
+
+    // Clustering Math (PCA & Elbow)
+    function initClusteringCharts() {
+      // 1. PCA Scatter Plot
+      const ctxPCA = document.getElementById('chart-pca-scatter');
+      if (ctxPCA) {
+        const clusterColors = ['#6366f1', '#ef4444', '#10b981', '#f59e0b'];
+        const datasets = [0, 1, 2, 3].map(c => {
+          const points = ML_DATA.sample_data
+            .filter(d => d.Cluster === c)
+            .map(d => ({ x: d.PCA1, y: d.PCA2, custId: d.ID, income: d.Income, spend: d.Total_Spent }));
+          return {
+            label: ML_DATA.cluster_profiles[c].name,
+            data: points,
+            backgroundColor: clusterColors[c],
+            pointRadius: 4,
+            pointHoverRadius: 6
+          };
+        });
+
+        new Chart(ctxPCA, {
+          type: 'scatter',
+          data: { datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const raw = context.raw;
+                    return `ID #${raw.custId}: Income ₹${raw.income.toLocaleString()} | Spend ₹${raw.spend}`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: { title: { display: true, text: 'PCA Component 1 (Purchasing Power & Luxury)' }, grid: { color: '#f1f5f9' } },
+              y: { title: { display: true, text: 'PCA Component 2 (Web Engagement & Deals)' }, grid: { color: '#f1f5f9' } }
+            }
+          }
+        });
+      }
+
+      // 2. Elbow Inertia Curve
+      const ctxElbow = document.getElementById('chart-elbow-curve');
+      if (ctxElbow) {
+        new Chart(ctxElbow, {
+          type: 'line',
+          data: {
+            labels: ML_DATA.elbow_curve.map(e => `k = ${e.k}`),
+            datasets: [{
+              label: 'Inertia (Within-Cluster Sum of Squares)',
+              data: ML_DATA.elbow_curve.map(e => e.inertia),
+              borderColor: '#4f46e5',
+              backgroundColor: 'rgba(79, 70, 229, 0.1)',
+              fill: true,
+              tension: 0.3,
+              pointBackgroundColor: ML_DATA.elbow_curve.map(e => e.k === 4 ? '#ef4444' : '#4f46e5'),
+              pointRadius: ML_DATA.elbow_curve.map(e => e.k === 4 ? 8 : 5),
+              pointHoverRadius: 9
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              y: { title: { display: true, text: 'Inertia' }, grid: { color: '#f1f5f9' } },
+              x: { grid: { display: false } }
+            }
+          }
+        });
+      }
+    }
+
+    // Campaign Simulator
+    function setupSimulator() {
+      const budgetSlider = document.getElementById('sim-budget');
+      if (budgetSlider) {
+        budgetSlider.addEventListener('input', (e) => {
+          document.getElementById('sim-budget-display').innerText = '₹' + parseInt(e.target.value).toLocaleString();
+          runSimulation();
+        });
+      }
+
+      const segSelect = document.getElementById('sim-segment');
+      const campSelect = document.getElementById('sim-campaign');
+      if (segSelect) segSelect.addEventListener('change', runSimulation);
+      if (campSelect) campSelect.addEventListener('change', runSimulation);
+
+      const recalcBtn = document.getElementById('btn-recalculate-sim');
+      if (recalcBtn) recalcBtn.addEventListener('click', () => {
+        runSimulation();
+        showToast('Campaign simulation updated', 'info');
+      });
+    }
+
+    function runSimulation() {
+      const segVal = document.getElementById('sim-segment').value;
+      const campVal = document.getElementById('sim-campaign').value;
+      const budget = parseFloat(document.getElementById('sim-budget').value) || 5000;
+
+      // Base metrics depending on cluster
+      let audienceSize = 300;
+      let baseConv = 0.20;
+      let aov = 200;
+      let fitScore = 'High Fit (88%)';
+
+      if (segVal === '0') { // Stars VIP
+        audienceSize = 300;
+        aov = 420;
+        baseConv = (campVal === 'vip_wine') ? 0.38 : (campVal === 'clearance_deal' ? 0.08 : 0.22);
+        fitScore = (campVal === 'vip_wine') ? 'Optimal Match (94%)' : 'Suboptimal (45%)';
+      } else if (segVal === '1') { // Frugal
+        audienceSize = 360;
+        aov = 65;
+        baseConv = (campVal === 'clearance_deal') ? 0.42 : (campVal === 'vip_wine' ? 0.04 : 0.18);
+        fitScore = (campVal === 'clearance_deal') ? 'Optimal Match (96%)' : 'Poor Fit (25%)';
+      } else if (segVal === '2') { // Middle-Class
+        audienceSize = 300;
+        aov = 175;
+        baseConv = (campVal === 'omni_cashback') ? 0.28 : 0.16;
+        fitScore = (campVal === 'omni_cashback') ? 'Optimal Match (90%)' : 'Moderate Fit (68%)';
+      } else if (segVal === '3') { // Tech Savvy
+        audienceSize = 240;
+        aov = 260;
+        baseConv = (campVal === 'digital_flash') ? 0.34 : 0.18;
+        fitScore = (campVal === 'digital_flash') ? 'Optimal Match (92%)' : 'Moderate Fit (60%)';
+      } else { // All
+        audienceSize = 1200;
+        aov = 180;
+        baseConv = 0.18;
+        fitScore = 'Generic Mass Blast (55%)';
+      }
+
+      const costPerCust = budget / audienceSize;
+      const estimatedOrders = Math.round(audienceSize * baseConv);
+      const grossRevenue = estimatedOrders * aov;
+      const netProfit = grossRevenue - budget;
+      const roi = Math.round((netProfit / budget) * 100);
+
+      document.getElementById('sim-reach').innerText = `${audienceSize} customers`;
+      document.getElementById('sim-cpc').innerText = `₹${costPerCust.toFixed(2)}`;
+      document.getElementById('sim-fit').innerText = fitScore;
+
+      document.getElementById('res-conv-rate').innerText = (baseConv * 100).toFixed(1) + '%';
+      document.getElementById('res-orders').innerText = estimatedOrders.toLocaleString();
+      document.getElementById('res-revenue').innerText = '₹' + Math.round(grossRevenue).toLocaleString();
+      
+      const roiEl = document.getElementById('res-roi');
+      roiEl.innerText = (roi >= 0 ? '+' : '') + roi + '%';
+      roiEl.className = 'text-lg font-extrabold ' + (roi >= 0 ? 'text-emerald-600' : 'text-red-600');
+
+      // Update Chart
+      const ctxSim = document.getElementById('chart-sim-results');
+      if (ctxSim) {
+        if (state.charts.sim) state.charts.sim.destroy();
+
+        state.charts.sim = new Chart(ctxSim, {
+          type: 'bar',
+          data: {
+            labels: ['Campaign Spend', 'Gross Revenue', 'Net Margin'],
+            datasets: [{
+              label: 'INR (₹)',
+              data: [budget, grossRevenue, Math.max(0, netProfit)],
+              backgroundColor: ['#64748b', '#10b981', '#6366f1'],
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { beginAtZero: true, grid: { color: '#f1f5f9' }, title: { display: true, text: 'INR (₹)' } },
+              x: { grid: { display: false } }
+            }
+          }
+        });
+      }
+    }
+
+    // Dataset Explorer Table
+    function setupDatasetTable() {
+      const searchInput = document.getElementById('table-search');
+      const clusterSelect = document.getElementById('table-cluster-filter');
+      const prevBtn = document.getElementById('btn-prev-page');
+      const nextBtn = document.getElementById('btn-next-page');
+
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          state.tableSearch = e.target.value.toLowerCase();
+          state.currentPage = 1;
+          renderTable();
+        });
+      }
+
+      if (clusterSelect) {
+        clusterSelect.addEventListener('change', (e) => {
+          state.tableClusterFilter = e.target.value;
+          state.currentPage = 1;
+          renderTable();
+        });
+      }
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          if (state.currentPage > 1) {
+            state.currentPage--;
+            renderTable();
+          }
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          state.currentPage++;
+          renderTable();
+        });
+      }
+
+      renderTable();
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById('dataset-table-body');
+      if (!tbody) return;
+
+      let filtered = ML_DATA.sample_data.filter(row => {
+        const matchesCluster = (state.tableClusterFilter === 'all') || (row.Cluster.toString() === state.tableClusterFilter);
+        const matchesSearch = !state.tableSearch || 
+          row.ID.toString().includes(state.tableSearch) ||
+          row.Education.toLowerCase().includes(state.tableSearch) ||
+          row.Marital_Status.toLowerCase().includes(state.tableSearch) ||
+          row.Age.toString().includes(state.tableSearch);
+        return matchesCluster && matchesSearch;
+      });
+
+      const totalItems = filtered.length;
+      const totalPages = Math.ceil(totalItems / state.rowsPerPage) || 1;
+      if (state.currentPage > totalPages) state.currentPage = totalPages;
+
+      const startIndex = (state.currentPage - 1) * state.rowsPerPage;
+      const pagedData = filtered.slice(startIndex, startIndex + state.rowsPerPage);
+
+      const clusterColors = ['#6366f1', '#ef4444', '#10b981', '#f59e0b'];
+
+      tbody.innerHTML = pagedData.map(row => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="px-3 py-2.5 font-mono font-semibold text-slate-900">#${row.ID}</td>
+          <td class="px-3 py-2.5">${row.Age}</td>
+          <td class="px-3 py-2.5">${row.Education}</td>
+          <td class="px-3 py-2.5">${row.Marital_Status}</td>
+          <td class="px-3 py-2.5 font-semibold text-slate-800">₹${row.Income.toLocaleString()}</td>
+          <td class="px-3 py-2.5 font-semibold text-slate-800">₹${row.Total_Spent.toLocaleString()}</td>
+          <td class="px-3 py-2.5">${row.Children}</td>
+          <td class="px-3 py-2.5">${row.NumWebPurchases}</td>
+          <td class="px-3 py-2.5">${row.NumStorePurchases}</td>
+          <td class="px-3 py-2.5">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold" style="background-color: ${clusterColors[row.Cluster]}15; color: ${clusterColors[row.Cluster]}; border: 1px solid ${clusterColors[row.Cluster]}30">
+              Cluster ${row.Cluster}: ${ML_DATA.cluster_profiles[row.Cluster].name.split('/')[0]}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+
+      // Info
+      const startDisplay = totalItems > 0 ? startIndex + 1 : 0;
+      const endDisplay = Math.min(startIndex + state.rowsPerPage, totalItems);
+      document.getElementById('table-pagination-info').innerText = `Showing ${startDisplay} to ${endDisplay} of ${totalItems} entries`;
+
+      document.getElementById('btn-prev-page').disabled = (state.currentPage <= 1);
+      document.getElementById('btn-next-page').disabled = (state.currentPage >= totalPages);
+    }
+
+    // Code Viewer
+    function setupCodeViewer() {
+      const display = document.getElementById('code-display');
+      display.innerText = CODE_SNIPPETS.train;
+
+      document.querySelectorAll('.code-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.code-tab-btn').forEach(b => {
+            b.classList.remove('active', 'bg-indigo-50', 'text-indigo-700');
+            b.classList.add('text-slate-600');
+          });
+          btn.classList.add('active', 'bg-indigo-50', 'text-indigo-700');
+          btn.classList.remove('text-slate-600');
+
+          const codeKey = btn.getAttribute('data-code');
+          state.activeCodeSnippet = codeKey;
+          display.innerText = CODE_SNIPPETS[codeKey] || '';
+        });
+      });
+
+      const copyBtn = document.getElementById('btn-copy-code');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+          const text = display.innerText;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+              showToast('Code copied to clipboard!', 'success');
+            }).catch(() => fallbackCopy(text));
+          } else {
+            fallbackCopy(text);
+          }
+        });
+      }
+    }
+
+    function fallbackCopy(text) {
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+        showToast('Code copied to clipboard!', 'success');
+      } catch (err) {
+        showToast('Failed to copy code', 'error');
+      }
+    }
+
+    // CSV Download
+    function setupDownloads() {
+      const csvBtn = document.getElementById('btn-download-csv');
+      if (csvBtn) {
+        csvBtn.addEventListener('click', () => {
+          const headers = ['ID', 'Age', 'Education', 'Marital_Status', 'Income', 'Total_Spent', 'Children', 'NumWebPurchases', 'NumStorePurchases', 'Cluster', 'PCA1', 'PCA2'];
+          const rows = ML_DATA.sample_data.map(d => headers.map(h => d[h]).join(','));
+          const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n');
+          const encodedUri = encodeURI(csvContent);
+          const link = document.createElement('a');
+          link.setAttribute('href', encodedUri);
+          link.setAttribute('download', 'customer_personality_segmentation_sample.csv');
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          showToast('Downloaded CSV sample dataset', 'success');
+        });
+      }
+    }
+  </script>
+</body>
+</html>
