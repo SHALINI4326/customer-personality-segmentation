@@ -81,7 +81,14 @@ API Documentation will be live at `http://localhost:8000/docs`.
 Open `frontend/index.html` in any modern web browser or preview directly in Canvas!
 
 ### 5. screenshot
+<img width="1683" height="547" alt="Screenshot 2026-11-05 175409" src="https://github.com/user-attachments/assets/e86bca99-b116-43c7-99cc-7f95d676a5c6" />
+<img width="1612" height="596" alt="Screenshot 2026-11-05 175432" src="https://github.com/user-attachments/assets/deddf9ae-cb48-4a30-b27a-84f349a097d5" />
 <img width="1920" height="1080" alt="Screenshot (22)" src="https://github.com/user-attachments/assets/38f81d1d-c340-4f5d-9aab-04f13d1c07f5" />
+<img width="1630" height="533" alt="Screenshot 2026-11-05 175253" src="https://github.com/user-attachments/assets/fd0af88b-99a4-4787-ad70-c648a22e8ae0" />
+<img width="537" height="575" alt="Screenshot 2026-11-05 175312" src="https://github.com/user-attachments/assets/5ad633f4-7307-4a3f-a476-ec24ce28c784" />
+<img width="1035" height="592" alt="Screenshot 2026-11-05 175333" src="https://github.com/user-attachments/assets/2edf90ce-0640-4319-8c97-c3b7b4fce9b8" />
+<img width="1577" height="532" alt="Screenshot 2026-11-05 175350" src="https://github.com/user-attachments/assets/8be474f3-3c0b-419d-9d26-4680467060ec" />
+<img width="1637" height="727" alt="Screenshot 2026-11-05 175459" src="https://github.com/user-attachments/assets/1978d21a-00ab-4d69-a192-a1b232e2e7cd" />
 
 ### 6. visit site 
 https://shalini4326.github.io/customer-personality-segmentation/
