@@ -79,3 +79,5 @@ API Documentation will be live at `http://localhost:8000/docs`.
 
 ### 4. Open Interactive Web App
 Open `frontend/index.html` in any modern web browser or preview directly in Canvas!
+### 5. visit site 
+https://shalini4326.github.io/customer-personality-segmentation/
